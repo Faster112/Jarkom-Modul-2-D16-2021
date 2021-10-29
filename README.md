@@ -24,8 +24,5 @@ Sebelum lanjut ke soal berikutnya, yang pertama dilakukan adalah menyambungkan s
 ### Nomor 2
 * Buat domain **franky.D16.com** dengan alias **www.franky.D16.com** pada folder *kaizoku*!
 Buat folder *kaizoku* pada directory *bind* lalu duplikat file `/etc/bind/db.local/` ke `/etc/bind/kaizoku/franky.D16.com` dengan memasukkan command berikut
-```bash
-mkdir /etc/bind/kaizoku
-cp /etc/bind/db.local /etc/bind/kaizoku/franky.D16.com
-```
+
 Setelah itu 
