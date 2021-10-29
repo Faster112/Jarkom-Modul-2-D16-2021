@@ -10,6 +10,9 @@ apt install apache2 apache2-utils php libapache2-mod-php7.0 ca-certificates -y
 # Start apache
 service apache2 start
 
+# Ports
+cp ports.conf /etc/apache2/ports.conf
+
 # Defaul conf
 cp 000-default.conf /etc/apache2/sites-available/000-default.conf 
 
