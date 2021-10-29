@@ -16,6 +16,7 @@ Luffy ingin menghubungi Franky yang berada di **EniesLobby** dengan denden mushi
 ## Jawaban
 ### Nomor 1
 * Buatlah topologi berdasarkan apa yang ada pada soal!
+
 ![soal1](images/soal1.png)
 
 * Catatan
@@ -23,6 +24,7 @@ Sebelum lanjut ke soal berikutnya, yang pertama dilakukan adalah menyambungkan s
 
 ### Nomor 2
 * Buat domain **franky.D16.com** dengan alias **www.franky.D16.com** pada folder *kaizoku*!
+
 Buat folder *kaizoku* pada directory *bind* lalu duplikat file `/etc/bind/db.local/` ke `/etc/bind/kaizoku/franky.D16.com` dengan memasukkan command berikut
 
 Setelah itu 
