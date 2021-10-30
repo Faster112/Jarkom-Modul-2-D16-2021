@@ -57,3 +57,20 @@ Lalu tambahkan zone baru pada file `/etc/bind/named.conf.local`
 Restart bind9 dengan command `service bind9 restart`
 
 Pada node client, lakukan `ping franky.D16.com` dan `ping www.franky.D16.com`. Jika **franky.D16.con** mengarah ke IP **Skypie** dan **www.franky.D16.con** menunjuk ke **franky.D16.com** maka itu artinya sudah berhasil.
+
+![soal2-3](images/soal2-3.png)
+
+### Nomor 3
+* Buat subdomain **super.franky.D16.com** dengan alias **www.super.franky.D16.com** yang mengarah ke **Skypie**!
+
+Tambahkan beberapa baris pada **franky.D16.con** di **EniesLobby** sehingga menjadi seperti ini
+
+![soal3-1](images/soal3-1.png)
+```
+
+```
+
+Restart bind9 dengan menjalankan command `service bind9 restart`
+
+Pada node client, lakukan `ping super.franky.D16.com` dan `ping www.super.franky.D16.com`. Jika **super.franky.D16.con** mengarah ke IP **Skypie** dan **www.super.franky.D16.con** menunjuk ke **super.franky.D16.com** maka itu artinya sudah berhasil.
+
