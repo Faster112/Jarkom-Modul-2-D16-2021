@@ -74,3 +74,5 @@ Restart bind9 dengan menjalankan command `service bind9 restart`
 
 Pada node client, lakukan `ping super.franky.D16.com` dan `ping www.super.franky.D16.com`. Jika **super.franky.D16.con** mengarah ke IP **Skypie** dan **www.super.franky.D16.con** menunjuk ke **super.franky.D16.com** maka itu artinya sudah berhasil.
 
+![soal3-2](images/soal3-2.png)
+
