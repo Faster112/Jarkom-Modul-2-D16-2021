@@ -21,6 +21,63 @@ Luffy ingin menghubungi Franky yang berada di **EniesLobby** dengan denden mushi
 
 ![soal1](images/soal1.png)
 
+Berikut adalah network configuration tiap node
+* Foosha
+```
+auto eth0
+iface eth0 inet dhcp
+
+auto eth1
+iface eth1 inet static
+	address 10.29.1.1
+	netmask 255.255.255.0
+
+auto eth2
+iface eth2 inet static
+	address 10.29.2.1
+	netmask 255.255.255.0
+```
+* Loguetown
+```
+auto eth0
+iface eth0 inet static
+	address 10.29.1.2
+	netmask 255.255.255.0
+	gateway 10.29.1.1
+```
+* Alabasta
+```
+auto eth0
+iface eth0 inet static
+	address 10.29.1.3
+	netmask 255.255.255.0
+	gateway 10.29.1.1
+```
+* EniesLobby
+```
+auto eth0
+iface eth0 inet static
+	address 10.29.2.2
+	netmask 255.255.255.0
+	gateway 10.29.2.1
+```
+* Water7
+```
+auto eth0
+iface eth0 inet static
+	address 10.29.2.3
+	netmask 255.255.255.0
+	gateway 10.29.2.1
+```
+* Skypie
+```
+auto eth0
+iface eth0 inet static
+	address 10.29.2.4
+	netmask 255.255.255.0
+	gateway 10.29.2.1
+```
+
 * **CATATAN**
 
 Sebelum lanjut ke soal berikutnya, yang pertama dilakukan adalah menyambungkan semua node ke jaringan internet untuk menginstall semua software yang dibutuhkan, seperti `dnsutils` dan  `lynx` untuk 2 Client (**Loguetown** dan **Alabasta**) lalu install `bind9` untuk DNS Server (**EniesLobby** dan **Water7**) dan menginstall `apache` untuk Web Server (**Skypie**). Pada node **Foosha**, masukkan command `iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE -s 10.29.0.0/16`, lalu masukkan command `echo nameserver > /etc/resolv.conf` pada semua node selain **Foosha** untuk menyambungkan semua node ke internet.
@@ -46,13 +103,33 @@ Setelah itu edit file `franky.D16.com` pada folder *kaizoku* menjadi seperti dib
 
 ![soal2-1](images/soal2-1.png)
 ```
-
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     franky.D16.com. root.franky.D16.com. (
+                     2021102601         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@               IN      NS      franky.D16.com.
+@               IN      A       10.29.2.4
+www             IN      CNAME   franky.D16.com.
 ```
 
 Lalu tambahkan zone baru pada file `/etc/bind/named.conf.local`
 
 ![soal2-2](images/soal2-2.png)
 ```
+zone "franky.D16.com" {
+    type master;
+    notify yes;
+    also-notify { 10.29.2.3; }; // Masukan IP Water7 tanpa tanda petik
+    allow-transfer { 10.29.2.3; }; // Masukan IP Water7 tanpa tanda petik
+    file "/etc/bind/kaizoku/franky.D16.com";
+};
 
 ```
 
@@ -69,7 +146,22 @@ Tambahkan beberapa baris pada **franky.D16.con** di **EniesLobby** sehingga menj
 
 ![soal3-1](images/soal3-1.png)
 ```
-
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     franky.D16.com. root.franky.D16.com. (
+                     2021102601         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@               IN      NS      franky.D16.com.
+@               IN      A       10.29.2.4
+www             IN      CNAME   franky.D16.com.
+super           IN      A       10.29.2.4
+www.super       IN      CNAME   super
 ```
 
 Restart bind9 dengan menjalankan command `service bind9 restart`
@@ -81,4 +173,42 @@ Pada node client, lakukan `ping super.franky.D16.com` dan `ping www.super.franky
 ### Nomor 4
 * Buat reverse domain untuk domain utama!
 
-Duplikat file `/etc/bind/db.local` menjadi `/etc/bind/kaizoku/2.29.10.in-addr.arpa`
+Duplikat file `/etc/bind/db.local` menjadi `/etc/bind/kaizoku/2.29.10.in-addr.arpa`. Lalu ubah isi file `2.29.10.in-addr.arpa` menjadi seperti ini
+
+![soal4-1](images/soal4-1.png)
+```
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     franky.D16.com. root.franky.D16.com. (
+                     2021102601         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+2.29.10.in-addr.arpa.   IN      NS      franky.D16.com.
+2                       IN      PTR     franky.D16.com.
+```
+
+Lalu tambahkan zone baru pada file `/etc/bind/named.conf.local` sehingga menjadi seperti ini
+
+![soal4-2](images/soal4-2.png)
+```
+zone "2.29.10.in-addr.arpa" {
+    type master;
+    file "/etc/bind/kaizoku/2.29.10.in-addr.arpa";
+};
+```
+
+Kemudian cek dengan command `host -t PTR [IP EniesLobby]` pada client
+
+![soal4-3](soal4-3.png)
+
+### Nomor 5
+* Buat Water7 sebagai DNS Slave untuk domain utama!
+
+Sebelumnya, isi file `/etc/bind/named.conf.local` telah dikonfigurasi pada Soal Nomor 1 sehingga tidak perlu diedit lagi. Yang perlu diedit adalah file `/etc/bind/named.conf.options` dengan meng-comment `dnssec-validation auto;` dan menambahkan `allow-query { any; };` pada **EniesLobby** dan **Water7**.
+
+![soal5-1](images/soal5-1.png)
