@@ -76,3 +76,7 @@ Pada node client, lakukan `ping super.franky.D16.com` dan `ping www.super.franky
 
 ![soal3-2](images/soal3-2.png)
 
+### Nomor 4
+* Buat reverse domain untuk domain utama!
+
+Duplikat file `/etc/bind/db.local` menjadi `/etc/bind/kaizoku/2.29.10.in-addr.arpa`
