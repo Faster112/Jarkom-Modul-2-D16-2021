@@ -1,6 +1,7 @@
 # Jarkom-Modul-2-D16-2021
 ## Soal
 Luffy adalah seorang yang akan jadi Raja Bajak Laut. Demi membuat Luffy menjadi Raja Bajak Laut, Nami ingin membuat sebuah peta, bantu Nami untuk membuat peta berikut:
+
 ![topologi](images/topologi.png)
 
 **EniesLobby** akan dijadikan sebagai DNS Master, **Water7** akan dijadikan DNS Slave, dan **Skypie** akan digunakan sebagai Web Server. Terdapat 2 Client yaitu **Loguetown**, dan **Alabasta**. Semua node terhubung pada router **Foosha**, sehingga dapat mengakses internet (1). 
@@ -31,8 +32,28 @@ nameserver 10.29.2.4
 ```
 
 ### Nomor 2
-* Buat domain **franky.D16.com** dengan alias **www.franky.D16.com** pada folder *kaizoku*!
+* Buat domain **franky.D16.com** dengan alias **www.franky.D16.com** pada folder *kaizoku* di **EniesLobby**!
 
-Buat folder *kaizoku* pada directory *bind* lalu duplikat file `/etc/bind/db.local/` ke `/etc/bind/kaizoku/franky.D16.com` dengan memasukkan command berikut
+Pada **EniesLobby**, buat folder *kaizoku* pada directory *bind* lalu duplikat file `/etc/bind/db.local/` ke `/etc/bind/kaizoku/franky.D16.com` dengan memasukkan command berikut
+```bash
+mkdir /etc/bind/kaizoku
+cp /etc/bind/db.local /etc/bind/kaizoku/franky.D16.com
+```
 
-Setelah itu 
+Setelah itu edit file `franky.D16.com` pada folder *kaizoku* menjadi seperti dibawah ini
+
+![soal2-1](images/soal2-1.png)
+```
+
+```
+
+Lalu tambahkan zone baru pada file `/etc/bind/named.conf.local`
+
+![soal2-2](images/soal2-2.png)
+```
+
+```
+
+Restart bind9 dengan command `service bind9 restart`
+
+Pada node client, lakukan `ping franky.D16.com` dan `ping www.franky.D16.com`. Jika **franky.D16.con** mengarah ke IP **Skypie** dan **www.franky.D16.con** menunjuk ke **franky.D16.com** maka itu artinya sudah berhasil.
