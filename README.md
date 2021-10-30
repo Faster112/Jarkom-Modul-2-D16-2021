@@ -31,7 +31,7 @@ nameserver 10.29.2.2
 nameserver 10.29.2.3
 nameserver 10.29.2.4
 ```
-Semua script yang digunakan, dapat dilihat [di sini](script)
+Semua script yang digunakan, dapat dilihat [di sini](https://github.com/Faster112/Jarkom-Modul-2-D16-2021/tree/main/scripts)
 
 ### Nomor 2
 * Buat domain **franky.D16.com** dengan alias **www.franky.D16.com** pada folder *kaizoku* di **EniesLobby**!
