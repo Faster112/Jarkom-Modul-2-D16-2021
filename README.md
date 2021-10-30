@@ -19,8 +19,16 @@ Luffy ingin menghubungi Franky yang berada di **EniesLobby** dengan denden mushi
 
 ![soal1](images/soal1.png)
 
-* Catatan
+* **CATATAN**
+
 Sebelum lanjut ke soal berikutnya, yang pertama dilakukan adalah menyambungkan semua node ke jaringan internet untuk menginstall semua software yang dibutuhkan, seperti `dnsutils` dan  `lynx` untuk 2 Client (**Loguetown** dan **Alabasta**) lalu install `bind9` untuk DNS Server (**EniesLobby** dan **Water7**) dan menginstall `apache` untuk Web Server (**Skypie**). Pada node **Foosha**, masukkan command `iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE -s 10.29.0.0/16`, lalu masukkan command `echo nameserver > /etc/resolv.conf` pada semua node selain **Foosha** untuk menyambungkan semua node ke internet.
+
+Setelah menginstall semua yang diperlukan, edit lagi file `/etc/resolv.conf` agar node client tersambung ke node DNS Server dan Web Server. Masukkan configurasi berikut pada **Loguetown** dan **Alabasta**
+```
+nameserver 10.29.2.2
+nameserver 10.29.2.3
+nameserver 10.29.2.4
+```
 
 ### Nomor 2
 * Buat domain **franky.D16.com** dengan alias **www.franky.D16.com** pada folder *kaizoku*!
