@@ -1,4 +1,5 @@
 # Jarkom-Modul-2-D16-2021
+* Mohammad Tauchid (05111940000136)
 ## Soal
 Luffy adalah seorang yang akan jadi Raja Bajak Laut. Demi membuat Luffy menjadi Raja Bajak Laut, Nami ingin membuat sebuah peta, bantu Nami untuk membuat peta berikut:
 
@@ -30,6 +31,7 @@ nameserver 10.29.2.2
 nameserver 10.29.2.3
 nameserver 10.29.2.4
 ```
+Semua script yang digunakan, dapat dilihat [di sini](script)
 
 ### Nomor 2
 * Buat domain **franky.D16.com** dengan alias **www.franky.D16.com** pada folder *kaizoku* di **EniesLobby**!
