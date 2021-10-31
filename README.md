@@ -204,7 +204,7 @@ zone "2.29.10.in-addr.arpa" {
 
 Kemudian cek dengan command `host -t PTR [IP EniesLobby]` pada client
 
-![soal4-3](soal4-3.png)
+![soal4-3](images/soal4-3.png)
 
 ### Nomor 5
 * Buat Water7 sebagai DNS Slave untuk domain utama!
