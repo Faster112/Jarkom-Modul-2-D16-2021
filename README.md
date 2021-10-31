@@ -202,6 +202,8 @@ zone "2.29.10.in-addr.arpa" {
 };
 ```
 
+Restart bind9 dengan menjalankan command `service bind9 restart`
+
 Kemudian cek dengan command `host -t PTR [IP EniesLobby]` pada client
 
 ![soal4-3](images/soal4-3.png)
@@ -209,6 +211,295 @@ Kemudian cek dengan command `host -t PTR [IP EniesLobby]` pada client
 ### Nomor 5
 * Buat Water7 sebagai DNS Slave untuk domain utama!
 
-Sebelumnya, isi file `/etc/bind/named.conf.local` telah dikonfigurasi pada Soal Nomor 1 sehingga tidak perlu diedit lagi. Yang perlu diedit adalah file `/etc/bind/named.conf.options` dengan meng-comment `dnssec-validation auto;` dan menambahkan `allow-query { any; };` pada **EniesLobby** dan **Water7**.
+Sebelumnya, isi file `/etc/bind/named.conf.local` pada **EniesLobby** telah dikonfigurasi pada Soal Nomor 1 sehingga tidak perlu diedit lagi. Yang perlu diedit adalah file `/etc/bind/named.conf.options` dengan meng-comment `dnssec-validation auto;` dan menambahkan `allow-query { any; };` pada **EniesLobby** dan **Water7**.
 
 ![soal5-1](images/soal5-1.png)
+```
+options {
+        directory "/var/cache/bind";
+
+        // If there is a firewall between you and nameservers you want
+        // to talk to, you may need to fix the firewall to allow multiple
+        // ports to talk.  See http://www.kb.cert.org/vuls/id/800113
+
+        // If your ISP provided one or more IP addresses for stable
+        // nameservers, you probably want to use them as forwarders.
+        // Uncomment the following block, and insert the addresses replacing
+        // the all-0's placeholder.
+
+        // forwarders {
+        //      0.0.0.0;
+        // };
+
+        //========================================================================
+        // If BIND logs error messages about the root key being expired,
+        // you will need to update your keys.  See https://www.isc.org/bind-keys
+        //========================================================================
+        // dnssec-validation auto;
+        allow-query { any; };
+
+        auth-nxdomain no;    # conform to RFC1035
+        listen-on-v6 { any; };
+};
+```
+
+Kemudian edit file `/etc/bind/named.conf.local` di **Water7** menjadi seperti ini
+
+![soal5-2](images/soal5-2.png)
+```
+//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
+zone "franky.D16.com" {
+    type slave;
+    masters { 10.29.2.2; }; // Masukan IP EniesLobby tanpa tanda petik
+    file "/var/lib/bind/franky.D16.com";
+};
+```
+
+Restart bind9 dengan menjalankan command `service bind9 restart`
+
+Setelah itu stop service bind di **EniesLobby** dengan command `service bind9 stop` dan lakukan `ping franky.D16.com` pada client untuk mengecek apakah DNS Slave sudah dapat bekerja
+
+![soal5-3](images/soal5-3.png)
+
+### Nomor 6
+* Delegasikan subdomain **mecha.franky.yyy.com** dengan alias **www.mecha.franky.yyy.com** dari **EniesLobby** ke **Water7** dengan IP menuju ke **Skypie** dalam folder *sunnygo*!
+
+Edit file `/etc/bind/kaizoku/franky.D16.com` menjadi seperti ini
+
+![soal6-1](images/soal6-1.png)
+```
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     franky.D16.com. root.franky.D16.com. (
+                     2021102601         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@               IN      NS      franky.D16.com.
+@               IN      A       10.29.2.4
+www             IN      CNAME   franky.D16.com.
+super           IN      A       10.29.2.4
+www.super       IN      CNAME   super
+ns1             IN      A       10.29.2.3
+mecha           IN      NS      ns1
+```
+
+Lalu restart bind9 dengan menjalankan command `service bind9 restart`
+
+Pada **Water7** buat folder baru bernama *sunnygo* lalu duplikasi file `/etc/bind/db.local` ke `/etc/bind/sunnygo/mecha.franky.D16.com`
+```bash
+mkdir /etc/bind/sunnygo
+cp /etc/bind/db.local /etc/bind/sunnygo/mecha.franky.D16.com
+```
+
+Kemudian edit file `mecha.franky.D16.com` menjadi seperti ini
+
+![soal6-2](images/soal6-2.png)
+```
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     mecha.franky.D16.com. root.mecha.franky.D16.com. (
+                     2021102601         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@               IN      NS      mecha.franky.D16.com.
+@               IN      A       10.29.2.4
+www             IN      CNAME   mecha.franky.D16.com.
+```
+
+Selanjutnya, tambahkan zone baru pada `/etc/bind/named.conf.local` sehingga menjadi seperti ini
+
+![soal6-3](images/soal6-3)
+```
+//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
+zone "franky.D16.com" {
+    type slave;
+    masters { 10.29.2.2; }; // Masukan IP EniesLobby tanpa tanda petik
+    file "/var/lib/bind/franky.D16.com";
+};
+
+zone "mecha.franky.D16.com" {
+    type master;
+    file "/etc/bind/sunnygo/mecha.franky.D16.com";
+};
+```
+
+Restart bind menggunakan command `service bind9 restart`
+
+Pada client, lakukan `ping mecha.franky.D16.com` atau `www.mecha.franky.D16.com` untuk melihat hasilnya
+
+![soal6-4](images/soal6-4.png)
+
+### Nomor 7
+* Buatlah subdomain **general.mecha.franky.yyy.com** dengan alias **www.general.mecha.franky.yyy.com** yang mengarah ke **Skypie**
+
+Pada **Water7**, edit file, `mecha.franky.D16.com` menjadi seperti ini
+
+![soal7-1](images/soal7-1.png)
+```
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     mecha.franky.D16.com. root.mecha.franky.D16.com. (
+                     2021102601         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@               IN      NS      mecha.franky.D16.com.
+@               IN      A       10.29.2.4
+www             IN      CNAME   mecha.franky.D16.com.
+general         IN      A       10.29.2.4
+www.general     IN      CNAME   general
+```
+
+Restart bind menggunakan command `service bind9 restart`
+
+Pada client, lakukan `ping general.mecha.franky.D16.com` atau `www.general.mecha.franky.D16.com` untuk melihat hasilnya
+
+![soal7-2](images/soal7-2.png)
+
+### Nomor 8
+* Buat webserver **www.franky.yyy.com** dengan DocumentRoot pada `/var/www/franky.yyy.com`!
+
+Pada **Water7**, download requirement file pada github, lalu ekstrak file tersebut. Copykan folder `franky` ke `/var/www/franky.D16.com`. Kemudian duplikat file `/etc/apache2/sites-available/000-default.conf` ke `/etc/apache2/sites-available/franky.D16.com.conf` lalu tambahkan beberapa baris file tersebut menjadi seperti ini
+
+![soal8-1](images/soal8-1.png)
+```
+ServerAdmin webmaster@localhost
+DocumentRoot /var/www/franky.D16.com
+ServerName franky.D16.com
+ServerAlias www.franky.D16.com
+```
+
+Enable configurasi tersebut dengan `a2ensite franky.D16.com` lalu restart apache2 dengan command `service apache2 restart`
+
+Pada client masukkan command `lynx franky.D16.com` untuk melihat hasilnya
+
+![soal8-2](images/soal8-2.png)
+
+### Nomor 9
+* Konfigurasikan sehingga url **www.franky.yyy.com/index.php/home** dapat menjadi menjadi **www.franky.yyy.com/home**
+
+Tambahkan file `.htaccess` pada DocumentRoot (`/var/www/franky.D16.com`) lalu isikan file tersebut dengan ini
+
+![soal9-1](images/soal9-1.png)
+```
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([^\.]+)$ $1.html [NC,L]
+```
+
+Lalu tambahkan baris dibawah ini pada file `/etc/apache2/sites-available/franky.D16.com.conf`
+```
+<Directory /var/www/franky.D16.com>
+    Options +FollowSymLinks -Multiviews
+    AllowOverride All
+</Directory>
+```
+
+Sehingga menjadi seperti ini
+
+![soal9-2](images/soal9-2/png)
+
+Restart apache2 dengan command `service apache2 restart`
+
+Pada client, dapat lakukan `lynx franky.D16.com/home` untuk melihat hasilnya
+
+### Nomor 10
+* Buat subdomain **www.super.franky.yyy.com** menjadi penyimpanan aset yang memiliki DocumentRoot pada `/var/www/super.franky.yyy.com`
+
+Copykan folder `super.franky` ke `/var/www/super.franky.D16.com` dan copykan file `/etc/apache2/sites-available/000-default.conf` ke `/etc/apache2/sites-available/super.franky.D16.com.conf` lalu edit file tersebut dengan menambahkan baris berikut
+```
+ServerAdmin webmaster@localhost
+DocumentRoot /var/www/super.franky.D16.com
+ServerName super.franky.D16.com
+ServerAlias www.super.franky.D16.com
+```
+
+Restart apache2 dengan command `service apache2 restart`
+
+Pada client, dapat lakukan `lynx super.franky.D16.com` untuk melihat hasilnya
+
+### Nomor 11
+* Buatlah agar pada folder `/public`, hanya dapat melakukan directory listing saja!
+
+Edit file `/etc/apache2/sites-available/super.franky.D16.com.conf` dengan menambahkan beberapa baris seperti berikut
+```
+<Directory /var/www/super.franky.D16.com/public>
+    Options +Indexes
+</Directory>
+```
+
+Restart apache2 dengan command `service apache2 restart`
+
+Pada client, dapat lakukan `lynx super.franky.D16.com` untuk melihat hasilnya
+
+### Nomor 12
+* Gunakan error file 404.html pada folder /error untuk mengganti error kode pada apache!
+
+Masukkan command berikut
+```bash
+echo ErrorDocument 404 /error/404.html > /var/www/super.franky.D16.com/.htaccess
+```
+
+Kemudian tambahkan baris berikut pada file `/etc/apache2/sites-available/super.franky.D16.com.conf`
+```
+<Directory /var/www/super.franky.D16.com/error>
+    Options -Indexes
+</Directory>
+
+<Directory /var/www/super.franky.D16.com>
+    Options FollowSymLinks
+    AllowOverride All
+</Directory>
+```
+
+Restart apache2 dengan command `service apache2 restart`
+
+Untuk mengecek apakah berhasil, masukkan command `lynx super.franky.D16.com/[kata_apapun]`
+
+![soal12](images/soal12.png)
+
+### Nomor 13
+* Konfigurasikan file agar dapat mengakses file asset `www.super.franky.yyy.com/public/js` menjadi `www.super.franky.yyy.com/js`
+
+Gunakanlah directory alias dengan menambahkan baris berikut pada file `/etc/apache2/sites-available/super.franky.D16.com.conf`
+```
+Alias "/js" "/var/www/super.franky.D16.com/public/js"
+```
+
+Sehingga hasil keseluruhan file seperti berikut
+
+![soal13-1](images/soal13-1.png)
+
+Restart apache2 dengan command `service apache2 restart`
+
+Pada client, jalankan command `www.super.franky.yyy.com/js` untuk melihat hasilnya
+
+![soal13-2](images/soal13-2.png)
