@@ -425,7 +425,7 @@ Lalu tambahkan baris dibawah ini pada file `/etc/apache2/sites-available/franky.
 
 Sehingga menjadi seperti ini
 
-![soal9-2](images/soal9-2/png)
+![soal9-2](images/soal9-2.png)
 
 Restart apache2 dengan command `service apache2 restart`
 
